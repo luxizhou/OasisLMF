@@ -14,6 +14,7 @@ __all__ = [
     'merge_dataframes',
     'PANDAS_BASIC_DTYPES',
     'PANDAS_DEFAULT_NULL_VALUES',
+    'reduce_df',
     'set_dataframe_column_dtypes'
 ]
 
@@ -545,6 +546,26 @@ def merge_dataframes(left, right, join_on=None, **kwargs):
         del _left, _right
 
         return join
+
+
+def reduce_df(df, cols=None):
+    """
+    A method to select columns in a dataframe
+
+    :param df: The dataframe to pretty-print
+    :type df: pd.DataFrame
+
+    :param cols: A list of columns
+    :type cols: list
+
+    :return: A reduced dataframe
+    :rtype: pd.DataFrame
+
+    """
+    if not cols:
+        return df
+    else:
+        return df[cols]
 
 
 def print_dataframe(
