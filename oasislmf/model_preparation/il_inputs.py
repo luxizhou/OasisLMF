@@ -530,6 +530,7 @@ def get_il_input_items(
         ([SOURCE_IDX['loc']] if SOURCE_IDX['loc'] in il_inputs_df else []) +
         ([SOURCE_IDX['acc']] if SOURCE_IDX['acc'] in il_inputs_df else []) +
         (['steptriggertype'] if 'steptriggertype' in il_inputs_df else []) +
+        step_trigger_type_cols +
         site_pd_and_site_all_term_cols +
         term_cols
     )
@@ -673,28 +674,6 @@ def get_il_input_items(
         how='inner'
     )
 
-    # If step policies listed, create additional column to determine agg id
-    # from coverage aggregation method
-    if 'steptriggertype' in layer_df:
-        def assign_cov_agg_id(row):
-            try:
-                cov_agg_method = STEP_TRIGGER_TYPES[row['steptriggertype']]['coverage_aggregation_method']
-                return COVERAGE_AGGREGATION_METHODS[cov_agg_method][row['coverage_type_id']]
-            except KeyError:
-                return 0
-
-        layer_df['cov_agg_id'] = layer_df.apply(lambda row: assign_cov_agg_id(row), axis=1)
-
-        def assign_calcrule_flag(row):
-            try:
-                calcrule_assign_method = STEP_TRIGGER_TYPES[row['steptriggertype']]['calcrule_assignment_method']
-                return CALCRULE_ASSIGNMENT_METHODS[calcrule_assign_method][row['cov_agg_id']]
-
-            except KeyError:
-                return False
-
-        layer_df['assign_step_calcrule'] = layer_df.apply(lambda row: assign_calcrule_flag(row), axis=1)
-
     # Remove the source columns for all non-layer FM levels - this includes the
     # site pd (# 2), site all (# 3), cond. all (# 6), policy all (# 9) FM levels
     cond_all_and_pol_all_term_cols = get_fm_terms_oed_columns(fm_terms, levels=['cond all', 'policy all'])
@@ -732,6 +711,34 @@ def get_il_input_items(
     il_inputs_df = pd.concat([il_inputs_df, layer_df], sort=True, ignore_index=True)
     il_inputs_df.drop(term_cols, axis=1, inplace=True)
     del layer_df
+
+    # If step policies listed, create additional columns to determine agg id
+    # from coverage aggregation method and whether step calc. rule should be
+    # assigned from agg id
+    if 'steptriggertype' in il_inputs_df:
+        def assign_cov_agg_id(row):
+            try:
+                cov_agg_method = STEP_TRIGGER_TYPES[row['steptriggertype']]['coverage_aggregation_method']
+                return COVERAGE_AGGREGATION_METHODS[cov_agg_method][row['coverage_type_id']]
+            except KeyError:
+                return 0
+
+        il_inputs_df['cov_agg_id'] = il_inputs_df.apply(lambda row: assign_cov_agg_id(row), axis=1)
+
+        def assign_calcrule_flag(row):
+            try:
+                calcrule_assign_method = STEP_TRIGGER_TYPES[row['steptriggertype']]['calcrule_assignment_method']
+                return CALCRULE_ASSIGNMENT_METHODS[calcrule_assign_method][row['cov_agg_id']]
+
+            except KeyError:
+                return False
+
+        il_inputs_df['assign_step_calcrule'] = il_inputs_df.apply(lambda row: assign_calcrule_flag(row), axis=1)
+        # Do not assign step calc. rules for first level
+        il_inputs_df.loc[
+            il_inputs_df['level_id'] == il_inputs_df['level_id'].min(),
+            'assign_step_calcrule'
+        ] = False
 
     # il_inputs are not necessarily in the same order for the topmost level when layers are present,
     # fix by sorting the il_inputs_df
