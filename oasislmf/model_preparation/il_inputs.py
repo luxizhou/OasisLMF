@@ -436,6 +436,7 @@ def get_il_input_items(
     usecols = [acc_num, portfolio_num, policy_num, cond_num, 'layer_id', SOURCE_IDX['acc']] + term_cols
     # If step policies listed, keep step trigger type and columns associated
     # with those step trigger types that are present
+    step_trigger_type_cols = []
     if step_policies_present:
         usecols += ['steptriggertype']
         # Find unique values of step policies to determine columns that need to
