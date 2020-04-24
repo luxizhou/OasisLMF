@@ -90,3 +90,4 @@ deductible with max. deductible; no limit % TIV,26,1,0,1,0,0,0,0,0,2,0,"(1, 0, 1
 no deductible; limit % TIV,14,0,0,0,1,0,0,0,0,2,0,"(0, 0, 0, 1, 0, 0, 0, 0, 2, 0)"
 no deductible % loss; limit % TIV,14,0,0,0,1,0,0,1,0,2,0,"(0, 0, 0, 1, 0, 0, 1, 0, 2, 0)"
 no deductible % TIV; limit % TIV,14,0,0,0,1,0,0,2,0,2,0,"(0, 0, 0, 1, 0, 0, 2, 0, 2, 0)"
+deductible % loss; limit,17,1,0,0,1,0,0,1,0,0,0,"(1, 0, 0, 1, 0, 0, 1, 0, 0, 0)"
